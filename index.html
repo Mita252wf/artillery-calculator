@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>弾道計算機</title>
+
 <style>
 body{
     font-family: Arial, sans-serif;
@@ -11,109 +12,107 @@ body{
     margin: 40px auto;
     padding: 20px;
 }
+
 input{
-    width: 120px;
+    width: 150px;
     padding: 5px;
 }
+
 button{
     padding: 5px 15px;
+    margin-left: 10px;
 }
+
 .result{
     margin-top: 20px;
     font-size: 20px;
 }
 </style>
 </head>
+
 <body>
 
 <h2>弾道計算機</h2>
 
 <p>距離[m]</p>
-<input type="number" id="distance">
+
+<input type="number" id="distance" placeholder="例: 400">
 
 <button onclick="calc()">計算</button>
 
 <div class="result">
-<p>低角[°]: <span id="low">-</span> °</p>
-<p>高角[°]: <span id="high">-</span> °</p>
+    <p>低角[°]：<span id="low">-</span></p>
+    <p>高角[°]：<span id="high">-</span></p>
 </div>
 
 <script>
 
+// 低角近似式
 function distanceLow(theta){
     return 0.0000469765*Math.pow(theta,4)
-    -0.00782645*Math.pow(theta,3)
-    +0.14768*Math.pow(theta,2)
-    +16.814*theta
-    +44.8239;
+         - 0.00782645*Math.pow(theta,3)
+         + 0.14768*Math.pow(theta,2)
+         + 16.814*theta
+         + 44.8239;
 }
 
+// 高角近似式
 function distanceHigh(theta){
     return -0.000184416*Math.pow(theta,4)
-    +0.04718*Math.pow(theta,3)
-    -4.78642*Math.pow(theta,2)
-    +213.453*theta
-    -2877.91;
-}
-
-/* 低角用（増加関数） */
-function solveLow(target,min,max){
-
-    for(let i=0;i<100;i++){
-
-        let mid=(min+max)/2;
-
-        if(distanceLow(mid) > target){
-            max=mid;
-        }else{
-            min=mid;
-        }
-    }
-
-    return (min+max)/2;
-}
-
-/* 高角用（減少関数） */
-function solveHigh(target,min,max){
-
-    for(let i=0;i<100;i++){
-
-        let mid=(min+max)/2;
-
-        if(distanceHigh(mid) > target){
-            min=mid;
-        }else{
-            max=mid;
-        }
-    }
-
-    return (min+max)/2;
+         + 0.04718*Math.pow(theta,3)
+         - 4.78642*Math.pow(theta,2)
+         + 213.453*theta
+         - 2877.91;
 }
 
 function calc(){
 
-    let target =
+    const target =
         parseFloat(document.getElementById("distance").value);
 
     if(isNaN(target)){
+        alert("距離を入力してください");
         return;
     }
 
-    if(target < 43 || target > 580){
-        alert("43m～580mの範囲で入力してください");
-        return;
+    let lowAngle = null;
+    let highAngle = null;
+
+    let lowError = Infinity;
+    let highError = Infinity;
+
+    // 低角探索
+    for(let theta=0; theta<=45; theta+=0.01){
+
+        let d = distanceLow(theta);
+        let err = Math.abs(d-target);
+
+        if(err < lowError){
+            lowError = err;
+            lowAngle = theta;
+        }
     }
 
-    let low = solveLow(target,0,45);
-    let high = solveHigh(target,45,79);
+    // 高角探索
+    for(let theta=45; theta<=79; theta+=0.01){
 
-    document.getElementById("low").innerHTML =
-        low.toFixed(2);
+        let d = distanceHigh(theta);
+        let err = Math.abs(d-target);
 
-    document.getElementById("high").innerHTML =
-        high.toFixed(2);
+        if(err < highError){
+            highError = err;
+            highAngle = theta;
+        }
+    }
+
+    document.getElementById("low").textContent =
+        lowAngle.toFixed(2);
+
+    document.getElementById("high").textContent =
+        highAngle.toFixed(2);
 }
 
 </script>
+
 </body>
 </html>
