@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>弾道計算機</title>
+<style>
+body{
+    font-family: Arial, sans-serif;
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+}
+input{
+    width: 120px;
+    padding: 5px;
+}
+button{
+    padding: 5px 15px;
+}
+.result{
+    margin-top: 20px;
+    font-size: 20px;
+}
+</style>
+</head>
+<body>
+
+<h2>弾道計算機</h2>
+
+<p>距離(m)</p>
+<input type="number" id="distance">
+
+<button onclick="calc()">計算</button>
+
+<div class="result">
+<p>低角解: <span id="low">-</span> °</p>
+<p>高角解: <span id="high">-</span> °</p>
+</div>
+
+<script>
+
+function distanceLow(theta){
+    return 0.0000469765*Math.pow(theta,4)
+    -0.00782645*Math.pow(theta,3)
+    +0.14768*Math.pow(theta,2)
+    +16.814*theta
+    +44.8239;
+}
+
+function distanceHigh(theta){
+    return -0.000184416*Math.pow(theta,4)
+    +0.04718*Math.pow(theta,3)
+    -4.78642*Math.pow(theta,2)
+    +213.453*theta
+    -2877.91;
+}
+
+function solve(target,min,max,func){
+
+    for(let i=0;i<100;i++){
+
+        let mid=(min+max)/2;
+
+        if(func(mid)>target){
+            max=mid;
+        }else{
+            min=mid;
+        }
+    }
+
+    return (min+max)/2;
+}
+
+function calc(){
+
+    let target=parseFloat(
+        document.getElementById("distance").value
+    );
+
+    if(isNaN(target)){
+        return;
+    }
+
+    let low=solve(target,0,45,distanceLow);
+
+    let high=solve(target,45,79,distanceHigh);
+
+    document.getElementById("low").innerHTML=
+        low.toFixed(2);
+
+    document.getElementById("high").innerHTML=
+        high.toFixed(2);
+}
+</script>
+
+</body>
+</html>
