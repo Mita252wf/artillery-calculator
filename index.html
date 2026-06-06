@@ -1,43 +1,3 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>弾道計算機</title>
-<style>
-body{
-    font-family: Arial, sans-serif;
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 20px;
-}
-input{
-    width: 120px;
-    padding: 5px;
-}
-button{
-    padding: 5px 15px;
-}
-.result{
-    margin-top: 20px;
-    font-size: 20px;
-}
-</style>
-</head>
-<body>
-
-<h2>弾道計算機</h2>
-
-<p>距離(m)</p>
-<input type="number" id="distance">
-
-<button onclick="calc()">計算</button>
-
-<div class="result">
-<p>低角解: <span id="low">-</span> °</p>
-<p>高角解: <span id="high">-</span> °</p>
-</div>
-
 <script>
 
 function distanceLow(theta){
@@ -56,13 +16,14 @@ function distanceHigh(theta){
     -2877.91;
 }
 
-function solve(target,min,max,func){
+/* 低角用（増加関数） */
+function solveLow(target,min,max){
 
     for(let i=0;i<100;i++){
 
         let mid=(min+max)/2;
 
-        if(func(mid)>target){
+        if(distanceLow(mid) > target){
             max=mid;
         }else{
             min=mid;
@@ -72,27 +33,45 @@ function solve(target,min,max,func){
     return (min+max)/2;
 }
 
+/* 高角用（減少関数） */
+function solveHigh(target,min,max){
+
+    for(let i=0;i<100;i++){
+
+        let mid=(min+max)/2;
+
+        if(distanceHigh(mid) > target){
+            min=mid;
+        }else{
+            max=mid;
+        }
+    }
+
+    return (min+max)/2;
+}
+
 function calc(){
 
-    let target=parseFloat(
-        document.getElementById("distance").value
-    );
+    let target =
+        parseFloat(document.getElementById("distance").value);
 
     if(isNaN(target)){
         return;
     }
 
-    let low=solve(target,0,45,distanceLow);
+    if(target < 43 || target > 580){
+        alert("43m～580mの範囲で入力してください");
+        return;
+    }
 
-    let high=solve(target,45,79,distanceHigh);
+    let low = solveLow(target,0,45);
+    let high = solveHigh(target,45,79);
 
-    document.getElementById("low").innerHTML=
+    document.getElementById("low").innerHTML =
         low.toFixed(2);
 
-    document.getElementById("high").innerHTML=
+    document.getElementById("high").innerHTML =
         high.toFixed(2);
 }
-</script>
 
-</body>
-</html>
+</script>
